@@ -1,0 +1,5 @@
+"Forgot password" i clienten, er der allerade paa server
+//
+Gem et array i databasen, der refererer til den pågældende chat med alle beskeder, der er blevet skrevet mellem de to brugere.
+//
+
