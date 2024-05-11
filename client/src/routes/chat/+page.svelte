@@ -1,27 +1,20 @@
 <script>
 	import { onMount } from 'svelte';
 	import io from 'socket.io-client';
-	import { api, username, token } from '../../stores';
+	import { api, username, token, friends, chatVisible, userToConnectTo } from '../../stores';
+	import { goto } from '$app/navigation';
+	import Navbar from '../../components/navbar.svelte';
 	const API = $api;
 
 	let socket;
 	let message = '';
-	let currentUser = $username;
-
 	let messages = [];
-	let userToConnectTo = '-';
-
-	let addFriendInput = '';
-	let friends = [''];
-
-	let chatVisible = false;
-
-	console.log($token, $username);
+	
+	let currentUser = $username;
 
 	let intervalId = setInterval(getFriends, 10000);
 
 	async function getFriends() {
-		try {
 			const response = await fetch(`${API}/user`, {
 				headers: {
 					Authorization: `Bearer ${$token}`
@@ -33,11 +26,7 @@
 			}
 
 			const data = await response.json();
-			friends = data.friends;
-		} catch (error) {
-			console.error('Failed to fetch friends:', error);
-			// Optionally, update UI to show an error message
-		}
+			friends.set(data.friends); // Correct way to set the store value
 	}
 
 	function formatDate() {
@@ -64,16 +53,9 @@
 		return `${day}. ${month} • ${hours}:${minutes}`;
 	}
 
-	console.log(formatDate());
-
-	function signOut() {
-		username.set('');
-		token.set('');
-		window.location.href = '/';
-	}
 
 	const sendMessage = () => {
-		const room = [$username, userToConnectTo].sort().join('-');
+		const room = [$username, $userToConnectTo].sort().join('-');
 		if (message.trim() !== '') {
 			socket.emit('chat message', { room: room, message: message.trim() });
 			message = '';
@@ -81,64 +63,18 @@
 	};
 
 	function closeChat() {
-		chatVisible = false; 
-	}
+        $chatVisible = false; // Use $ to interact with store
+    }
 
-	function changeFriend(friend) {
-		userToConnectTo = friend;
-		changeUserToConnectTo();
-		chatVisible = true; // Open the chat box when a new friend is selected
-	}
+    function changeFriend(friend) {
+        $userToConnectTo = friend; // Use $ to interact with store
+        changeUserToConnectTo();
+        $chatVisible = true; // Open the chat box when a new friend is selected
+    }
 
-	async function addFriend(friendUsername) {
-		//see if user exists in db
-
-		const response = await fetch(`${API}/users/exists/${friendUsername}`);
-		let isUserExists = await response.json();
-
-		isUserExists = isUserExists.exists;
-		let isInFriendlist = false;
-
-		for (let friend of friends) {
-			if (friendUsername === friend) {
-				isInFriendlist = true;
-			}
-		}
-
-		if (isInFriendlist) {
-			alert("Can't add friend already in friendlist");
-		}
-
-		if (!isUserExists) {
-			alert("Can't add friend: user " + friendUsername + ' not found');
-		}
-
-		if (isUserExists && !isInFriendlist) {
-			try {
-				const response = await fetch(`${API}/users/addFriend`, {
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${$token}`,
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ friendUsername: friendUsername })
-				});
-
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`);
-				}
-
-				await getFriends();
-			} catch (error) {
-				console.error('Failed to add friend:', error);
-			}
-		} else {
-			console.log('error adding friend');
-		}
-	}
 
 	const changeUserToConnectTo = () => {
-		const room = [$username, userToConnectTo].sort().join('-');
+		const room = [$username, $userToConnectTo].sort().join('-');
 		socket.emit('leave room', room); // Leave current room
 		socket.emit('join room', room); // Join new room
 		messages = []; // Clear messages
@@ -159,7 +95,7 @@
 				// Optionally, update UI to show an error message
 			});
 
-			const room = [$username, userToConnectTo].sort().join('-');
+			const room = [$username, $userToConnectTo].sort().join('-');
 			socket.emit('join room', room);
 
 			socket.on('chat message', ({ message, username: senderUsername }) => {
@@ -171,81 +107,61 @@
 	});
 </script>
 
+<Navbar></Navbar>
 
-	<div class="container">
-		<div class="flex-container">
-			<div>
-				<input class="user-input" type="text" bind:value={addFriendInput} />
-				<button
-					class="change-user-button"
-					on:click={() => {
-						addFriend(addFriendInput);
-					}}>Add friend</button
-				>
+<div class="chatContainerContainer">
+	{#if $chatVisible}
+		<div class="chatbox-container">
+			<div
+				style="display: flex; justify-content: space-between; background: lightgrey; align-items: center;"
+			>
+				<p style="margin-left: 15px;"><strong>{$userToConnectTo}</strong></p>
+				<button style="height: 25px; margin-right: 15px;" on:click={closeChat}>Close Chat</button>
+			</div>
+			<div class="message-container">
+				<div class="message-list">
+					{#each messages as { message, username }}
+						<div class={username === currentUser ? 'message current-user' : 'message other-user'}>
+							<p class="message-info">{username} • {[formatDate()]}</p>
+							<div class="message-body">{message}</div>
+						</div>
+					{/each}
+				</div>
 			</div>
 
-			<div>
-				<p class="username-display" style="display: inline;">
-					{$username}
-				</p>
-				<button on:click={signOut}>Sign Out</button>
+			<div class="message-input-container">
+				<textarea
+					class="message-input"
+					type="text"
+					bind:value={message}
+					placeholder="Type your message..."
+				></textarea>
+				<button class="send-button" on:click={sendMessage}>Send</button>
 			</div>
 		</div>
+	{/if}
+
+	<div
+		style="margin-left: 1vw; background: #DCDBDD; height: calc(100vh - 100px); overflow-y: scroll"
+		id="friends"
+	>
+		<h4>Contacts</h4>
+		<ul>
+			{#each $friends as friend}
+				<li>
+					<button
+						on:click={() => {
+							changeFriend(friend);
+						}}
+					>
+						<div class="initial-circle">{friend.charAt(0)}</div>
+						{friend}
+					</button>
+				</li>
+			{/each}
+		</ul>
 	</div>
-
-	<div class="chatContainerContainer">
-		{#if chatVisible}
-			<div class="chatbox-container">
-				<div
-					style="display: flex; justify-content: space-between; background: lightgrey; align-items: center;"
-				>
-					<p style="margin-left: 15px;"><strong>{userToConnectTo}</strong></p>
-					<button style="height: 25px; margin-right: 15px;" on:click={closeChat}>Close Chat</button>
-				</div>
-				<div class="message-container">
-					<div class="message-list">
-						{#each messages as { message, username }}
-							<div class={username === currentUser ? 'message current-user' : 'message other-user'}>
-								<p class="message-info">{username} • {[formatDate()]}</p>
-								<div class="message-body">{message}</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-
-				<div class="message-input-container">
-					<textarea
-						class="message-input"
-						type="text"
-						bind:value={message}
-						placeholder="Type your message..."
-					></textarea>
-					<button class="send-button" on:click={sendMessage}>Send</button>
-				</div>
-			</div>
-		{/if}
-
-		<div
-			style="margin-left: 1vw; background: #DCDBDD; height: calc(100vh - 100px); overflow-y: scroll"
-			id="friends"
-		>
-			<h4>Contacts</h4>
-			<ul>
-				{#each friends as friend}
-					<li>
-						<button
-							on:click={() => {
-								changeFriend(friend);
-							}}
-						>
-							<div class="initial-circle">{friend.charAt(0)}</div>
-							{friend}
-						</button>
-					</li>
-				{/each}
-			</ul>
-		</div>
-	</div>
+</div>
 
 <style>
 	textarea {
@@ -258,29 +174,7 @@
 		align-items: end;
 	}
 
-	.container {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 10px;
-		background-color: #333;
-		color: white;
-		border-radius: 5px;
-		margin-top: 1em;
-		margin-bottom: 1em;
-	}
 
-	.flex-container {
-		display: flex;
-		width: 100%;
-		justify-content: space-between;
-	}
-
-	.username-display {
-		background-color: #555;
-		padding: 5px;
-		border-radius: 5px;
-	}
 
 	.message-container {
 		width: 70vw;

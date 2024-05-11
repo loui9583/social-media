@@ -8,5 +8,8 @@ export const user = writable({
     username: 1234
 });
 
+export let friends = writable([])
+export let chatVisible = writable(false)
+export let userToConnectTo = writable("-")
 export const token = writable()
 export const username = writable()
