@@ -30,7 +30,7 @@
                 token.set(data.token);
              
                 // Redirect to the profile page
-                goto("/chat")
+                goto("/app")
             } else {
                 // Handle login error
                 console.error("Login failed");

@@ -2,9 +2,12 @@
 	import { onMount } from 'svelte';
 	import io from 'socket.io-client';
 	import { api, username, token, friends, chatVisible, userToConnectTo, messages } from '../../stores';
-	import Navbar from '../../components/navbar.svelte';
-	import Messages from '../../components/messages.svelte';
-	import Friends from '../../components/friends.svelte';
+	import Navbar from '../../components/Navbar.svelte';
+	import Messages from '../../components/Messages.svelte';
+	import Friends from '../../components/Friends.svelte';
+	import Feed from '../../components/Feed.svelte';
+	import LeftSidebar from '../../components/LeftSidebar.svelte';
+	
 	
 	let socket;
 	
@@ -43,8 +46,11 @@
 </script>
 
 <Navbar></Navbar>
+<div style="height: 50px;"></div>
 
 <div class="chatContainerContainer">
+	<p> &nbsp;</p>
+	<Feed></Feed>
 	{#if $chatVisible}
 		<Messages closeChat={closeChat} socket={socket}></Messages>
 	{/if}
@@ -54,11 +60,10 @@
 
 <style>
 	.chatContainerContainer {
-		width: 100%;
+		
 		display: flex;
-		justify-content: end;
-		align-items: end;
-	}
-
-	
+		justify-content: space-between;
+		background-color: #F0F2F5;  /* Facebook-like background color */
+	}	
 </style>
+

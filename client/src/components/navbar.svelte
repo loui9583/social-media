@@ -104,22 +104,63 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 10px;
-		background-color: #333;
-		color: white;
+		background-color: #2c3e50; /* Updated background color */
+		color: #ecf0f1; /* Updated text color */
 		border-radius: 5px;
-		margin-top: 1em;
+	
 		margin-bottom: 1em;
+		font-family: Arial, sans-serif; /* Updated font */
+		position: fixed; top: 0;
+		width: calc(100vw - 45px); 
+		z-index: 2;
 	}
 
 	.flex-container {
 		display: flex;
 		width: 100%;
 		justify-content: space-between;
+		align-items: center; /* Center vertically */
 	}
 
 	.username-display {
-		background-color: #555;
-		padding: 5px;
+		background-color: #34495e; /* Updated background color */
+		padding: 8px 12px; /* Adjusted padding */
 		border-radius: 5px;
+		margin-right: 10px; /* Added margin for spacing */
+	}
+
+	.user-input {
+		padding: 8px;
+		border: 1px solid #ccc; /* Updated border color */
+		border-radius: 5px;
+		margin-right: 10px; /* Added margin for spacing */
+	}
+
+	.change-user-button {
+		padding: 8px 16px;
+		background-color: #3498db; /* Updated background color */
+		color: #fff; /* Updated text color */
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+	}
+
+	.change-user-button:hover {
+		background-color: #2980b9; /* Darker shade on hover */
+	}
+
+	button {
+		padding: 8px 16px;
+		background-color: #e74c3c; /* Updated background color */
+		color: #fff; /* Updated text color */
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+	}
+
+	button:hover {
+		background-color: #c0392b; /* Darker shade on hover */
 	}
 </style>
