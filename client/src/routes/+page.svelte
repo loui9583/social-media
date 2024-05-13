@@ -1,6 +1,6 @@
 <script>
     import { onMount } from "svelte";
-    import {api, username, token} from "../stores"
+    import { api, username, token } from "../stores";
     import { goto } from '$app/navigation';
     const API = $api;
 
@@ -8,11 +8,11 @@
  
     });
 
-    let usernameInput = ""; // Refactored variable name
+    let usernameInput = ""; 
     let password = "";
 
     async function handleSubmit(event) {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault();
 
         try {
             const response = await fetch(`${API}/users/login`, {
@@ -20,7 +20,7 @@
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ username: usernameInput, password }), // Updated to match refactored username
+                body: JSON.stringify({ username: usernameInput, password }),
             });
 
             if (response.ok) {
@@ -29,10 +29,8 @@
                 username.set(usernameInput);
                 token.set(data.token);
              
-                // Redirect to the profile page
-                goto("/app")
+                goto("/app");
             } else {
-                // Handle login error
                 console.error("Login failed");
             }
         } catch (error) {
@@ -40,6 +38,54 @@
         }
     }
 </script>
+
+<style>
+    /* Styling for the login form */
+    form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="text"],
+    input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    button[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: none;
+        border-radius: 4px;
+        background-color: #4caf50;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #45a049;
+    }
+
+    h3 {
+        text-align: center;
+    }
+
+    h4 {
+        text-align: center;
+    }
+</style>
+
 <h4>Don't have a user?  <a href="/signup">Sign up here</a></h4>
 <hr>
 
@@ -59,8 +105,6 @@
         placeholder="Password"
     />
     <br /><br />
-    <button style="background: green; color: white" type="submit"
-        >Sign in</button
-    >    
+    <button type="submit">Sign in</button>    
 </form>
-<h4><a href="forgotpasswordform">Forgot</a></h4>
+<h4><a href="forgotpassword">Forgot Password?</a></h4>

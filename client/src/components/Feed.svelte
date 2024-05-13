@@ -105,8 +105,6 @@
         padding: 20px;
         width: calc(100vw - 277px);
 		display: flex;
-		gap: 10px;
-		
 	}
 
 	textarea[type="text"] {

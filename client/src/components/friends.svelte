@@ -1,6 +1,12 @@
 <script>
+	import { onMount } from 'svelte';
 	export let socket;
 	import { friends, username, userToConnectTo, messages, chatVisible, token, api } from '../stores';
+	import { get } from 'svelte/store';
+
+	let friendsWithStatus = [];
+
+	function updateFriendsWithStatus() {}
 
 	async function getFriends() {
 		const response = await fetch(`${$api}/user`, {
@@ -14,10 +20,28 @@
 		}
 
 		const data = await response.json();
-		friends.set(data.friends); // Correct way to set the store value
+		let tempArr = [];
+
+		for (let friend of data.friends) {
+			let onlineStatus = await isUserOnline(friend); // Use await to wait for the promise to resolve
+			let newFriend = { friend: friend, online: onlineStatus }; // Now `online` will be true or false
+			tempArr.push(newFriend);
+		}
+		friendsWithStatus = tempArr;
+		friends.set(data.friends); // Correct way to set the store value		
 	}
-    
-	getFriends()
+
+	async function isUserOnline(username) {
+		const response = await fetch(`${$api}/users/isconnected/${username}`);
+		const data = await response.json();
+
+		return data;
+	}
+
+	onMount(async () => {
+		await getFriends();
+		setInterval(getFriends, 5000);
+	});
 
 	const changeUserToConnectTo = () => {
 		const room = [$username, $userToConnectTo].sort().join('-');
@@ -36,11 +60,16 @@
 <div class="friends-container">
 	<h4>Contacts</h4>
 	<ul class="friend-list">
-		{#each $friends as friend}
+		{#each friendsWithStatus as friend}
 			<li>
-				<button on:click={() => { changeFriend(friend); }}>
-					<div class="initial-circle">{friend.charAt(0)}</div>
-					<span class="friend-name">{friend}</span>
+				<button
+					on:click={() => {
+						changeFriend(friend.friend);
+					}}
+				>
+					<div class="initial-circle">{friend.friend.charAt(0)}</div>
+					<span class="friend-name">{friend.friend}</span>
+					<div class="status-indicator {friend.online.isConnected ? 'online' : 'offline'}"></div>
 				</button>
 			</li>
 		{/each}
@@ -51,14 +80,13 @@
 	.friends-container {
 		margin-top: 20px;
 		margin-left: 1vw;
-		background: #DCDBDD;
+		background: #dcdbdd;
 		height: calc(100vh - 100px);
 		overflow-y: auto;
 		padding: 20px;
 		border-radius: 10px;
-		position: fixed; 
+		position: fixed;
 		right: 0;
-		
 	}
 
 	.friends-container h4 {
@@ -81,7 +109,7 @@
 		display: flex;
 		align-items: center;
 		text-align: left;
-	
+
 		padding: 10px;
 		background-color: #fff;
 		border: none;
@@ -93,7 +121,6 @@
 
 	.friend-list li button:hover {
 		background-color: #f0f0f0;
-		
 	}
 
 	.initial-circle {
@@ -115,5 +142,20 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+	.status-indicator {
+		height: 10px;
+		width: 10px;
+		border-radius: 50%;
+		display: inline-block;
+		margin-left: 10px;
+	}
+
+	.online {
+		background-color: green;
+	}
+
+	.offline {
+		background-color: red;
 	}
 </style>

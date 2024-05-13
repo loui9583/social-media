@@ -1,80 +1,89 @@
 <script>
-	import { api, username, token, friends } from '../stores';
+    import toastr from "toastr";
+    import "toastr/build/toastr.css";
+    import { api, username, token, friends } from '../stores';
     import { goto } from '$app/navigation';
-	let addFriendInput = '';
+    export let socket;
+    let addFriendInput = '';
 
-	function signOut() {
-		username.set('');
-		token.set('');
-		goto('/');
-	}
+    toastr.options = {
+        closeButton: true,
+       
+    };
 
-	async function getFriends() {
-		try {
-			const response = await fetch(`${$api}/user`, {
-				headers: {
-					Authorization: `Bearer ${$token}`
-				}
-			});
+    function signOut() {
+        socket.disconnect();
+        username.set('');
+        token.set('');
+        goto('/');
+    }
 
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			}
+    async function getFriends() {
+        try {
+            const response = await fetch(`${$api}/user`, {
+                headers: {
+                    Authorization: `Bearer ${$token}`
+                }
+            });
 
-			const data = await response.json();
-			friends.set(data.friends); // Correct way to set the store value
-		} catch (error) {
-			console.error('Failed to fetch friends:', error);
-			// Optionally, update UI to show an error message
-		}
-	}
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-	async function addFriend(friendUsername) {
-		//see if user exists in db
+            const data = await response.json();
+            friends.set(data.friends); // Correct way to set the store value
+        } catch (error) {
+            console.error('Failed to fetch friends:', error);
+            toastr.error('Failed to fetch friends');
+        }
+    }
 
-		const response = await fetch(`${$api}/users/exists/${friendUsername}`);
-		let isUserExists = await response.json();
+    async function addFriend(friendUsername) {
+        const response = await fetch(`${$api}/users/exists/${friendUsername}`);
+        let isUserExists = await response.json();
 
-		isUserExists = isUserExists.exists;
-		let isInFriendlist = false;
+        isUserExists = isUserExists.exists;
+        let isInFriendlist = false;
 
-		for (let friend of $friends) {
-			if (friendUsername === friend) {
-				isInFriendlist = true;
-			}
-		}
+        for (let friend of $friends) {
+            if (friendUsername === friend) {
+                isInFriendlist = true;
+            }
+        }
 
-		if (isInFriendlist) {
-			alert("Can't add friend already in friendlist");
-		}
+        if (isInFriendlist) {
+            toastr.error("Can't add friend, already in friendlist");
+        }
 
-		if (!isUserExists) {
-			alert("Can't add friend: user " + friendUsername + ' not found');
-		}
+        if (!isUserExists) {
+            toastr.error("Can't add friend: user " + friendUsername + ' not found');
+        }
 
-		if (isUserExists && !isInFriendlist) {
-			try {
-				const response = await fetch(`${$api}/users/addFriend`, {
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${$token}`,
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ friendUsername: friendUsername })
-				});
+        if (isUserExists && !isInFriendlist) {
+            try {
+                const response = await fetch(`${$api}/users/addFriend`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${$token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ friendUsername: friendUsername })
+                });
 
-				if (!response.ok) {
-					throw new Error(`HTTP error! status: ${response.status}`);
-				}
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
-				await getFriends();
-			} catch (error) {
-				console.error('Failed to add friend:', error);
-			}
-		} else {
-			console.log('error adding friend');
-		}
-	}
+                toastr.success('Friend added successfully!');
+                await getFriends();
+            } catch (error) {
+                console.error('Failed to add friend:', error);
+                toastr.error('Failed to add friend');
+            }
+        } else {
+            console.log('error adding friend');
+        }
+    }
 </script>
 
 <div class="container">
