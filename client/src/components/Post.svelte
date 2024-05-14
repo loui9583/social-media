@@ -1,11 +1,21 @@
 <script>
+	import { onMount } from "svelte";
+
+    import { username, api, token } from '../stores';
+    
     export let post;
     let likes = 0;
     let newComment = '';
     let comments = [
       // your comments data
     ];
+    let page = 1;
+
+    onMount( async () => {
+
+    })
   
+
     function toggleLike() {
       likes += 1;
     }

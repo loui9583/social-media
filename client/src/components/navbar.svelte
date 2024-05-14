@@ -1,7 +1,7 @@
 <script>
     import toastr from "toastr";
     import "toastr/build/toastr.css";
-    import { api, username, token, friends } from '../stores';
+    import { api, username, token, friends, user } from '../stores';
     import { goto } from '$app/navigation';
     export let socket;
     let addFriendInput = '';
@@ -59,7 +59,11 @@
             toastr.error("Can't add friend: user " + friendUsername + ' not found');
         }
 
-        if (isUserExists && !isInFriendlist) {
+		if (friendUsername === $username) {
+			toastr.error("Can't add yourself as a friend")
+		}
+
+        if (isUserExists && !isInFriendlist && friendUsername !== $username) {
             try {
                 const response = await fetch(`${$api}/users/addFriend`, {
                     method: 'POST',

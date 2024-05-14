@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 import { sendLoginMail, sendForgotPasswordEmail } from "./nodemail.js";
 import dotenv from "dotenv";
 
-let connectedUsers = [{username: ''}];
+let connectedUsers = [{ username: '' }];
 
 
 dotenv.config();
@@ -31,6 +31,24 @@ const userSchema = new mongoose.Schema({
 });
 
 const UserModel = mongoose.model("users", userSchema);
+
+const commentSchema = new mongoose.Schema({
+  content: String,
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+  createdAt: { type: Date, default: Date.now },
+  username: String
+});
+
+const postSchema = new mongoose.Schema({
+  content: String,
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+  createdAt: { type: Date, default: Date.now },
+  comments: [commentSchema], // Embedding comments directly in the post
+  username: String
+});
+
+const PostModel = mongoose.model("Post", postSchema);
+
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -86,10 +104,6 @@ io.on('connection', (socket) => {
         io.to(room).emit('chat message', { message: message, username: user.username });
       });
 
-
-
-
-
       // Disconnect event
       socket.on('disconnect', () => {
         console.log(`${socket.user.username} disconnected`);
@@ -100,13 +114,8 @@ io.on('connection', (socket) => {
         }
         console.log('Updated list of connected users:', connectedUsers);
       });
-
-
-
     }
   });
-
-
 });
 
 app.post("/users/login", async (req, res) => {
@@ -132,6 +141,7 @@ app.post("/users/login", async (req, res) => {
 });
 
 app.post('/users/signup', async (req, res) => {
+
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const user = new UserModel({
@@ -142,7 +152,7 @@ app.post('/users/signup', async (req, res) => {
     await user.save();
     res.status(201).send();
   } catch (error) {
-    console.error(error);
+    console.error(error); c
     res.status(500).send("Error creating user");
   }
 });
@@ -244,14 +254,76 @@ app.post('/users/addfriend', authenticateToken, async (req, res) => {
   }
 });
 
-  app.get('/users/isconnected/:username', async (req,res) => {
-    const { username } = req.params;
-    let result = false;
-    for (let user of connectedUsers){
-      if (user.username===username) result=true;
-    }
-    res.json({ isConnected: result });
-  })
+app.get('/users/isconnected/:username', async (req, res) => {
+  const { username } = req.params;
+  let result = false;
+  for (let user of connectedUsers) {
+    if (user.username === username) result = true;
+  }
+  res.json({ isConnected: result });
+})
+
+app.post('/posts', authenticateToken, async (req, res) => {
+  const { content } = req.body;
+  const newPost = new PostModel({
+    content: content,
+    author: req.user._id,  // Assuming req.user._id is set from authenticateToken middleware
+    username: req.user.username
+  });
+
+  try {
+    await newPost.save();
+    res.status(201).send(newPost);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error posting content");
+  }
+});
+
+app.get('/posts', authenticateToken, async (req, res) => {
+  let { page, limit } = req.query;
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 20;
+  const skip = (page - 1) * limit;
+
+  try {
+    const posts = await PostModel.find({ author: { $in: req.user.friends } })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('author', 'username');  // Optional: populate author info
+    res.json(posts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error fetching posts");
+  }
+});
+
+app.post('/posts/:postId/comments', authenticateToken, async (req, res) => {
+  const { postId } = req.params;
+  const { content } = req.body;
+  const comment = {
+    content: content,
+    author: req.user._id,  // Assuming req.user._id is set from authenticateToken middleware
+    createdAt: new Date(),
+    username: req.user.username
+  };
+
+  try {
+    const updatedPost = await PostModel.findByIdAndUpdate(
+      postId,
+      { $push: { comments: comment } },
+      { new: true } // Returns the updated document
+    ).populate('comments.author', 'username');
+
+    res.json(updatedPost);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error adding comment");
+  }
+});
+
+
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
