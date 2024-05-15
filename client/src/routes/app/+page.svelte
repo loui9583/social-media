@@ -1,21 +1,29 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import io from 'socket.io-client';
-	import { api, username, token, friends, chatVisible, userToConnectTo, messages } from '../../stores';
+	import {
+		api,
+		username,
+		token,
+		friends,
+		chatVisible,
+		userToConnectTo,
+		messages
+	} from '../../stores';
 	import Navbar from '../../components/Navbar.svelte';
 	import Messages from '../../components/Messages.svelte';
 	import Friends from '../../components/Friends.svelte';
 	import Feed from '../../components/Feed.svelte';
 	import LeftSidebar from '../../components/LeftSidebar.svelte';
-	
-	
-	let socket;
-	
-	function closeChat() {
-        $chatVisible = false; // Use $ to interact with store
-    }
+	import { goto } from '$app/navigation';
 
-	function initSocket(){
+	let socket;
+
+	function closeChat() {
+		$chatVisible = false; // Use $ to interact with store
+	}
+
+	function initSocket() {
 		if ($token) {
 			socket = io($api, {
 				auth: {
@@ -40,30 +48,44 @@
 		}
 	}
 
+	function closeSocket() {
+		if (socket) {
+			socket.close();
+		}
+	}
+
 	onMount(() => {
+		if (!$token) {
+			goto('/');
+		}
 		initSocket();
+	});
+
+	onDestroy(() => {
+		closeSocket(); 
+	
 	});
 </script>
 
-<Navbar socket={socket}></Navbar>
+
+{#if $token}
+<Navbar {socket}></Navbar>
 <div style="height: 50px;"></div>
 
 <div class="chatContainerContainer">
-	<p> &nbsp;</p>
+	<p>&nbsp;</p>
 	<Feed></Feed>
 	{#if $chatVisible}
-		<Messages closeChat={closeChat} socket={socket}></Messages>
+		<Messages {closeChat} {socket}></Messages>
 	{/if}
 
-	<Friends socket={socket}></Friends>
+	<Friends {socket}></Friends>
 </div>
-
+{/if}
 <style>
 	.chatContainerContainer {
-		
 		display: flex;
 		justify-content: space-between;
-		background-color: #F0F2F5;  /* Facebook-like background color */
-	}	
+		background-color: #f0f2f5; /* Facebook-like background color */
+	}
 </style>
-

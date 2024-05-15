@@ -20,7 +20,7 @@ POST http://localhost:3000/users/login
 Content-Type: application/json
 
 {
-    "username": "britney",
+    "username": "johnbob",
     "password": "1234"
 }
 
@@ -46,7 +46,7 @@ Content-Type: application/json
 ###
 
 GET http://localhost:3000/user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QxMjM0IiwiaWF0IjoxNzE1Mjc3Mjc1fQ.eGDFnk05JEJ5TVsMWtd3LpkKNHJ6zvismkGGxV750gk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5ib2IiLCJpYXQiOjE3MTU2ODc3NjZ9.kHWXZo46NI_E62itf4dSMoLwAPEBC2GIJYMEOXzNpjg
 
 ###
 
@@ -74,13 +74,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Impva
 Content-Type: application/json
 
 {
-    "content": "crazy wow"
+    "content": "CwwwwwwRAZY POST"
 }
 
 ###
 
 GET http://localhost:3000/posts?page1&limit=20
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImJyaXRuZXkiLCJpYXQiOjE3MTU2NzkwODF9.g0VQQzaeaq-so4JH0c37oJNRkbXllMkJwi1rBDMduaY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImpvaG5ib2IiLCJpYXQiOjE3MTU2ODc3NjZ9.kHWXZo46NI_E62itf4dSMoLwAPEBC2GIJYMEOXzNpjg
 
 
 ###
@@ -93,3 +93,6 @@ Content-Type: application/json
     "content": "INSANE.. THATS CRAZY"
 }
 
+###
+
+GET http://localhost:3000/post/66434be39a43c81e69cd4b3d

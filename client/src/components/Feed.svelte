@@ -1,35 +1,122 @@
 <script>
 	import Post from './Post.svelte';
 	import { username, api, token } from '../stores';
-    import { onMount } from "svelte";
+	import { onDestroy, onMount } from 'svelte';
+	import { get } from 'svelte/store';
+	import toastr from 'toastr';
+	import 'toastr/build/toastr.css';
+
+	toastr.options.allowHtml = true;
 
 	let posts = [];
-    let page = 1;
+	let page = 1;
+	let newPost = '';
+	let newUsername = '';
+	let getNewestPostInterval;
 
-	async function getPosts() {
-		const response = await fetch(`${$api}/posts?page=${page}&limit=20`, {
+	// Define the scroll handler as a named function
+	function handleScroll() {
+		if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight) {
+			getPosts();
+		}
+	}
+
+	function handleTop() {
+		if (window.scrollY === 0) {
+			getPosts();
+		}
+	}
+
+	async function addPost() {
+		try {
+			const response = await fetch(`${$api}/posts`, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${$token}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ content: newPost })
+			});
+
+			if (response.ok) {
+				console.log('Post added');
+				getPosts();
+			} else {
+				const errorData = await response.json();
+				throw new Error(errorData.message);
+			}
+		} catch (error) {
+			console.error('Error:', error.message);
+		}
+	}
+
+	async function getNewestPost() {
+		console.log(page);
+		const response = await fetch(`${$api}/posts?page=1&limit=1`, {
 			headers: {
 				Authorization: `Bearer ${$token}`
 			}
 		});
 		const data = await response.json();
-		posts = data;
-		posts = posts;
-		page = +1;
+		let newPost;
+		if (Array.isArray(data)) {
+			newPost = data[0];
+		}
+
+		if (newPost && newPost._id !== posts[0]._id) {
+			if (scrollY === 0) {
+				posts.unshift(newPost);
+				posts = posts;
+			} else {
+				toastr.info(`<a href="#" onclick="window.scrollTo(0,0); return false;">${newPost.username} just made a new post.</a>`)
+			}
+		}
+	}
+
+	async function getPosts() {
+		console.log(page);
+		const response = await fetch(`${$api}/posts?page=${page}&limit=3`, {
+			headers: {
+				Authorization: `Bearer ${$token}`
+			}
+		});
+		const data = await response.json();
+		if (Array.isArray(data)) {
+			posts = [...posts, ...data];
+		} else {
+			console.error('Data is not an array:', data);
+		}
+		page++;
+		if (data.length === 0) {
+			page = 1;
+			getPosts();
+		}
 	}
 
 	onMount(async () => {
-        await getPosts();
-    });
+		await getPosts();
+		// Add event listener using the named function
 
-	let newPost = '';
-	let newUsername = '';
+		getNewestPostInterval = setInterval(getNewestPost, 5000);
+
+		window.addEventListener('scroll', handleScroll);
+	});
+
+	onDestroy(() => {
+		// Remove event listener using the same named function
+
+		clearInterval(getNewestPostInterval);
+		window.removeEventListener('scroll', handleScroll);
+	});
 </script>
 
+<head>
+	<link href="toastr.css" rel="stylesheet" />
+</head>
 <div class="container" style="margin-right: 20px">
-	<div class="input-area">
+	<div id="input-area" class="input-area">
 		<textarea type="text" bind:value={newPost} placeholder="What's on your mind?" />
-		<button>Post</button>
+		<button on:click={addPost}>Post</button>
 	</div>
 
 	<div class="posts-container">

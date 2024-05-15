@@ -1,10 +1,11 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	export let socket;
 	import { friends, username, userToConnectTo, messages, chatVisible, token, api } from '../stores';
 	import { get } from 'svelte/store';
 
 	let friendsWithStatus = [];
+	let intervalId;
 
 	function updateFriendsWithStatus() {}
 
@@ -40,8 +41,12 @@
 
 	onMount(async () => {
 		await getFriends();
-		setInterval(getFriends, 5000);
+		intervalId = setInterval(getFriends, 5000);
 	});
+
+	onDestroy(() => {
+		clearInterval(intervalId);
+	})
 
 	const changeUserToConnectTo = () => {
 		const room = [$username, $userToConnectTo].sort().join('-');

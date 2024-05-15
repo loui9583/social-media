@@ -1,25 +1,56 @@
 <script>
-	import { onMount } from "svelte";
-
+    import { onDestroy, onMount } from "svelte";
     import { username, api, token } from '../stores';
-    
+
     export let post;
     let likes = 0;
     let newComment = '';
-    let comments = [
-      // your comments data
-    ];
-    let page = 1;
+    let comments = post.comments || [];
+    let intervalId;
+    async function addComment(){
+        try {
+            const response = await fetch(`${$api}/posts/${post._id}/comments`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${$token}`
+                },
+                body: JSON.stringify({content: newComment})
+            });
+            if (response.ok) {
+                newComment = ''; // clear input after successful post
+                updatePost(); // refresh post and comments
+            }
+        } catch (error) {
+            console.error('Failed to add comment:', error);
+        }
+    }
 
-    onMount( async () => {
-
-    })
-  
+    async function updatePost(){
+    try {
+        const response = await fetch(`${$api}/post/${post._id}`);
+        const data = await response.json();
+        post = data; // Svelte should react to this assignment
+        comments = [...data.comments]; // create a new array for comments to trigger reactivity
+    } catch (error) {
+        console.error('Failed to update post:', error);
+    }
+}
 
     function toggleLike() {
-      likes += 1;
+        likes += 1; // assuming server-side handling of likes, this should also sync
     }
+
+    onMount(() => {
+         intervalId = setInterval(updatePost, 5000)
+    })
+
+    onDestroy(() => {
+        clearInterval(intervalId)
+    })
+
 </script>
+
 
 <style>
     .post {
@@ -99,7 +130,7 @@
             Like | {likes}
         </button>
     </div>
-    
+  
     <div style="padding: 5px; background: #E3E3E3; border-radius: 10px">
     <p class="post-text">{post.content}</p>
 </div>
@@ -112,8 +143,8 @@
         {/each}
     </div>
     <div class="add-comment">
-        <input class="comment-input" type="text" placeholder="Add a comment..." />
-        <button class="submit-button">Add comment</button>
+        <input class="comment-input" bind:value={newComment} type="text" placeholder="Add a comment..." />
+        <button on:click={addComment} class="submit-button">Add comment</button>
     </div>
 </div>
 </div>

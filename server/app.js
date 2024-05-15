@@ -225,7 +225,6 @@ app.get("/user", authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error fetching user data");
   }
 });
 
@@ -287,6 +286,7 @@ app.get('/posts', authenticateToken, async (req, res) => {
   const skip = (page - 1) * limit;
 
   try {
+    
     const posts = await PostModel.find({ author: { $in: req.user.friends } })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -298,6 +298,13 @@ app.get('/posts', authenticateToken, async (req, res) => {
     res.status(500).send("Error fetching posts");
   }
 });
+
+app.get('/post/:postId', async (req, res) => {
+  const { postId } = req.params;
+  const post = await PostModel.findById(postId);
+  res.json(post);
+});
+
 
 app.post('/posts/:postId/comments', authenticateToken, async (req, res) => {
   const { postId } = req.params;
