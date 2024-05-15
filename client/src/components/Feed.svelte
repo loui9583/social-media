@@ -40,7 +40,7 @@
 
 			if (response.ok) {
 				console.log('Post added');
-				getPosts();
+				getNewestPost();
 			} else {
 				const errorData = await response.json();
 				throw new Error(errorData.message);
@@ -97,7 +97,7 @@
 		await getPosts();
 		// Add event listener using the named function
 
-		getNewestPostInterval = setInterval(getNewestPost, 5000);
+		getNewestPostInterval = setInterval(getNewestPost, 2000);
 
 		window.addEventListener('scroll', handleScroll);
 	});
