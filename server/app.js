@@ -14,6 +14,9 @@ let connectedUsers = [{ username: '' }];
 
 dotenv.config();
 
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const app = express();
 const server = http.createServer(app);
 
@@ -50,7 +53,15 @@ const postSchema = new mongoose.Schema({
 const PostModel = mongoose.model("Post", postSchema);
 
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const chatRoomSchema = new mongoose.Schema({
+  roomName: String,
+  createdAt: { type: Date, default: Date.now },
+  messages: [{message: String, username: String}]
+});
+
+const chatRoomModel = mongoose.model("chatRoom", chatRoomSchema);
+
+
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -63,6 +74,8 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
+
+
 
 const io = new Server(server, {
   cors: {
@@ -90,11 +103,21 @@ io.on('connection', (socket) => {
       console.log('User authenticated:', user.username);
 
       // Join room event
-      socket.on('join room', (roomUsername) => {
+      socket.on('join room', async (roomUsername) => {
         const username = socket.user.username;
         const room = [roomUsername].sort().join('-');
         socket.join(room);
         console.log(`User joined room: ${room}`);
+        const c = await chatRoomModel.findOne({roomName: room});
+        if (!c){
+          const newChatRoom = new chatRoomModel({
+            roomName: room,
+            messages: []  // Initializing an empty array for messages
+        });
+
+        await newChatRoom.save();
+            console.log(`New room created: ${room}`);
+        }
       });
 
       // Handle chat messages within the room
@@ -154,6 +177,59 @@ app.post('/users/signup', async (req, res) => {
   } catch (error) {
     console.error(error); c
     res.status(500).send("Error creating user");
+  }
+});
+
+app.get("/chatroom/:roomname", authenticateToken, async (req, res) => {
+  const { roomname } = req.params;
+  
+  try {
+    const chatRoom = await chatRoomModel.findOne({roomName: roomname})
+
+    if (!chatRoom) {
+      return res.status(404).send('Chatroom not found.'); // Handle case where chatRoom is not found
+    }
+
+    // Assuming roomName stores usernames separated by '-'
+    let chatRoomUsernames = chatRoom.roomName.split('-');
+    const { username } = req.user;
+    let isUserAllowed = chatRoomUsernames.includes(username);
+
+    if (isUserAllowed) {
+      res.json(chatRoom); // Send the entire chatRoom object including messages if the user is allowed
+    } else {
+      res.status(403).send('Access Denied: You do not have permission to enter this chatroom.');
+    }
+  } catch (error) {
+    res.status(500).send('Server error: ' + error.message);
+  }
+});
+
+
+app.post("/chatroom/:roomname", authenticateToken, async (req, res) => {
+  const { roomname } = req.params;
+  const { username } = req.user;
+  const { message } = req.body;
+
+  try {
+    // Find the chatroom document by ID
+    const chatRoom = await chatRoomModel.findOne({roomName: roomname})
+
+    // Assuming roomName stores usernames separated by '-'
+    let chatRoomUsernames = roomname.split('-');
+    let isUserAllowed = chatRoomUsernames.includes(username);
+
+    if (isUserAllowed) {
+      // Push the new message object into the messages array
+      chatRoom.messages.push({ message: message, username: username });
+      await chatRoom.save(); // Save the updated chatroom document
+      res.send('Message added successfully.');
+    } else {
+      res.status(403).send('Access Denied: You do not have permission to enter this chatroom.');
+    }
+  } catch (error) {
+    // Handle any errors that occur during the operation
+    res.status(500).send('Server error: ' + error.message);
   }
 });
 
@@ -286,7 +362,7 @@ app.get('/posts', authenticateToken, async (req, res) => {
   const skip = (page - 1) * limit;
 
   try {
-    
+
     const posts = await PostModel.find({ author: { $in: req.user.friends } })
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -304,7 +380,6 @@ app.get('/post/:postId', async (req, res) => {
   const post = await PostModel.findById(postId);
   res.json(post);
 });
-
 
 app.post('/posts/:postId/comments', authenticateToken, async (req, res) => {
   const { postId } = req.params;
@@ -329,8 +404,6 @@ app.post('/posts/:postId/comments', authenticateToken, async (req, res) => {
     res.status(500).send("Error adding comment");
   }
 });
-
-
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

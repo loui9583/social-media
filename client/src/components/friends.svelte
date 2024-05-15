@@ -6,8 +6,30 @@
 
 	let friendsWithStatus = [];
 	let intervalId;
+	
+	async function getRoomMessages(roomname) {
+		const response = await fetch(`${$api}/chatroom/${roomname}`, {
+			headers: {
+				Authorization: `Bearer ${$token}`
+			}
+		});
 
-	function updateFriendsWithStatus() {}
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+		
+		console.log(data)
+
+		if (data.messages.length>0){
+			$messages = [...$messages, ...data.messages]
+		}
+
+		console.log($messages)
+
+		
+	}
 
 	async function getFriends() {
 		const response = await fetch(`${$api}/user`, {
@@ -53,6 +75,7 @@
 		socket.emit('leave room', room); // Leave current room
 		socket.emit('join room', room); // Join new room
 		$messages = []; // Clear messages
+		getRoomMessages(room)
 	};
 
 	function changeFriend(friend) {
