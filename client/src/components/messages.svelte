@@ -43,7 +43,6 @@
 				const errorData = await response.json();
 				throw new Error(errorData.message);
 			}
-			console.log('Message saved to database');
 		} catch (error) {
 			console.error('Failed to save message:', error);
 		}
@@ -56,7 +55,6 @@
 			await saveMessage(room, message);
 			message = '';
 		}
-		console.log($messages);
 	};
 </script>
 

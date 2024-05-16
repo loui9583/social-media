@@ -41,7 +41,6 @@
 
 			socket.on('chat message', ({ message, username: senderUsername }) => {
 				$messages = [...$messages, { message, username: senderUsername }];
-				console.log($messages);
 			});
 		}
 	}

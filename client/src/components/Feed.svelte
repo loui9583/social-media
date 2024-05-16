@@ -13,6 +13,7 @@
 	let newPost = '';
 	let newUsername = '';
 	let getNewestPostInterval;
+	let lastToastrNotification = '';
 
 	function handleScroll() {
 		if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight) {
@@ -32,7 +33,6 @@
 			});
 
 			if (response.ok) {
-				console.log('Post added');
 				getNewestPost();
 			} else {
 				const errorData = await response.json();
@@ -44,7 +44,6 @@
 	}
 
 	async function getNewestPost() {
-		console.log(page);
 		const response = await fetch(`${$api}/posts?page=1&limit=1`, {
 			headers: {
 				Authorization: `Bearer ${$token}`
@@ -61,15 +60,18 @@
 				posts.unshift(newPost);
 				posts = posts;
 			} else {
-				toastr.info(
-					`<a href="#" onclick="window.scrollTo(0,0); return false;">${newPost.username} just made a new post.</a>`
-				);
+				let message = `<a href="#" onclick="window.scrollTo(0,0); return false;">${newPost.username} just made a new post.</a>`;
+
+				if (message !== lastToastrNotification) {
+					toastr.info(message);
+				}
+
+				lastToastrNotification = message;
 			}
 		}
 	}
 
 	async function getPosts() {
-		console.log(page);
 		const response = await fetch(`${$api}/posts?page=${page}&limit=3`, {
 			headers: {
 				Authorization: `Bearer ${$token}`
@@ -101,10 +103,6 @@
 		window.removeEventListener('scroll', handleScroll);
 	});
 </script>
-
-<head>
-	<link href="toastr.css" rel="stylesheet" />
-</head>
 
 <div class="container">
 	<div id="input-area" class="input-area">

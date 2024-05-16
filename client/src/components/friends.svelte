@@ -19,13 +19,11 @@
 
 		const data = await response.json();
 
-		console.log(data);
 
 		if (data.messages.length > 0) {
 			$messages = [...$messages, ...data.messages];
 		}
 
-		console.log($messages);
 	}
 
 	async function getFriends() {
