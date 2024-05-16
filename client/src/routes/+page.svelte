@@ -40,7 +40,6 @@
 </script>
 
 <style>
-    /* Styling for the login form */
     form {
         max-width: 400px;
         margin: 0 auto;

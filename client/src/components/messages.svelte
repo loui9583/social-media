@@ -7,7 +7,7 @@
 
 	function formatDate() {
 		const date = new Date();
-		const day = date.getDate(); // Get the day as a number (1-31)
+		const day = date.getDate();
 		const monthNames = [
 			'jan',
 			'feb',
@@ -22,55 +22,49 @@
 			'nov',
 			'dec'
 		];
-		const month = monthNames[date.getMonth()]; // Get the month as a name
+		const month = monthNames[date.getMonth()];
 		const hours = date.getHours();
-		const minutes = date.getMinutes().toString().padStart(2, '0'); // Ensure two-digit minutes
+		const minutes = date.getMinutes().toString().padStart(2, '0');
 
 		return `${day}. ${month} • ${hours}:${minutes}`;
 	}
 
+	async function saveMessage(room, message) {
+		try {
+			const response = await fetch(`${$api}/chatroom/${room}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${$token}`
+				},
+				body: JSON.stringify({ message: message })
+			});
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.message);
+			}
+			console.log('Message saved to database');
+		} catch (error) {
+			console.error('Failed to save message:', error);
+		}
+	}
 
-    async function saveMessage(room, message) {
-    try {
-      const response = await fetch(`${$api}/chatroom/${room}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${$token}`
-          // Include other headers like authentication tokens if required
-        },
-        body: JSON.stringify({ message: message })
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message);
-      }
-      console.log('Message saved to database');
-    } catch (error) {
-      console.error('Failed to save message:', error);
-    }
-  }
-
-  const sendMessage = async () => {
-    const room = [$username, $userToConnectTo].sort().join('-');
-    if (message.trim() !== '') {
-      socket.emit('chat message', { room: room, message: message.trim() });
-      await saveMessage(room, message);  // Save the message to the database
-      message = '';
-    }
-    console.log($messages);
-  };
+	const sendMessage = async () => {
+		const room = [$username, $userToConnectTo].sort().join('-');
+		if (message.trim() !== '') {
+			socket.emit('chat message', { room: room, message: message.trim() });
+			await saveMessage(room, message);
+			message = '';
+		}
+		console.log($messages);
+	};
 </script>
 
-
-
-<div style="position: fixed; bottom: 0; right: 0; z-index: 1">
+<div class="chatbox-container-container">
 	<div class="chatbox-container">
-		<div
-			style="display: flex; justify-content: space-between; background: lightgrey; align-items: center;"
-		>
-			<p style="margin-left: 15px;"><strong>{$userToConnectTo}</strong></p>
-			<button style="height: 25px; margin-right: 15px;" on:click={closeChat}>×</button>
+		<div class="chatbox-top">
+			<p class="userToConnectTo"><strong>{$userToConnectTo}</strong></p>
+			<button class="closeChatButton" on:click={closeChat}>×</button>
 		</div>
 		<div class="message-container">
 			<div class="message-list">
@@ -96,20 +90,44 @@
 </div>
 
 <style>
+	.closeChatButton {
+		height: 25px;
+		margin-right: 15px;
+	}
+	.closeChatButton {
+		height: 25px;
+		margin-right: 15px;
+	}
+	.userToConnectTo {
+		margin-left: 15px;
+	}
+	.chatbox-top {
+		display: flex;
+		justify-content: space-between;
+		background: lightgrey;
+		align-items: center;
+	}
+	.chatbox-container-container {
+		position: fixed;
+		bottom: 0;
+		right: 0;
+		z-index: 1;
+	}
+
 	.message-container {
 		width: 338px;
 		background: #f9f9f9;
 		border: 1px solid #ccc;
 		border-radius: 5px;
 		overflow: hidden;
-		padding: 0 10px; /* Ensures padding does not affect inner elements */
+		padding: 0 10px;
 	}
 
 	.message-list {
 		height: 400px;
 		overflow-y: auto;
 		padding: 10px;
-		width: 100%; /* Ensure it fills the parent's width minus padding */
+		width: 100%;
 	}
 
 	.message-input-container {
@@ -121,7 +139,7 @@
 	}
 
 	.message-input {
-		flex-grow: 1; /* Takes up the available space */
+		flex-grow: 1;
 		margin-right: 10px;
 		padding: 5px;
 		border: 1px solid #b3b3b3;
@@ -145,11 +163,11 @@
 		background-color: lightblue;
 		padding: 5px;
 		border-radius: 8px;
-		margin-left: auto; /* Keeps the message aligned to the right */
-		margin-right: 15px; /* Adds margin on the right */
-		max-width: calc(70%); /* Adjusted width to account for padding/margins on both sides */
+		margin-left: auto;
+		margin-right: 15px;
+		max-width: calc(70%);
 		box-sizing: border-box;
-		overflow-wrap: break-word; /* Standard approach */
+		overflow-wrap: break-word;
 	}
 
 	.other-user .message-body {
@@ -158,10 +176,10 @@
 		padding: 5px;
 		border-radius: 8px;
 
-		margin-right: auto; /* Keeps the message aligned to the left */
-		max-width: calc(70%); /* Consistent with current-user styling */
+		margin-right: auto;
+		max-width: calc(70%);
 		box-sizing: border-box;
-		overflow-wrap: break-word; /* Standard approach */
+		overflow-wrap: break-word;
 	}
 	textarea {
 		resize: none;

@@ -14,13 +14,12 @@
 	import Messages from '../../components/Messages.svelte';
 	import Friends from '../../components/Friends.svelte';
 	import Feed from '../../components/Feed.svelte';
-	import LeftSidebar from '../../components/LeftSidebar.svelte';
 	import { goto } from '$app/navigation';
 
 	let socket;
 
 	function closeChat() {
-		$chatVisible = false; // Use $ to interact with store
+		$chatVisible = false; 
 	}
 
 	function initSocket() {
@@ -30,12 +29,11 @@
 					token: $token
 				},
 				transports: ['websocket', 'polling'],
-				rejectUnauthorized: false // For development only, remember to handle properly in production
+				rejectUnauthorized: false 
 			});
 
 			socket.on('connect_error', (error) => {
 				console.error('Connection error:', error);
-				// Optionally, update UI to show an error message
 			});
 
 			const room = [$username, $userToConnectTo].sort().join('-');
@@ -70,7 +68,7 @@
 
 {#if $token}
 <Navbar {socket}></Navbar>
-<div style="height: 50px;"></div>
+<div id="nav-spacer"></div>
 
 <div class="chatContainerContainer">
 	<p>&nbsp;</p>
@@ -83,9 +81,12 @@
 </div>
 {/if}
 <style>
+	#nav-spacer{
+		height: 50px;
+	}
 	.chatContainerContainer {
 		display: flex;
 		justify-content: space-between;
-		background-color: #f0f2f5; /* Facebook-like background color */
+		background-color: #f0f2f5; 
 	}
 </style>

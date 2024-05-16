@@ -31,7 +31,7 @@
             }
 
             const data = await response.json();
-            friends.set(data.friends); // Correct way to set the store value
+            friends.set(data.friends); 
         } catch (error) {
             console.error('Failed to fetch friends:', error);
             toastr.error('Failed to fetch friends');
@@ -103,7 +103,7 @@
 		</div>
 
 		<div>
-			<p class="username-display" style="display: inline;">
+			<p class="username-display">
 				{$username}
 			</p>
 			<button on:click={signOut}>Sign Out</button>
@@ -117,12 +117,12 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 10px;
-		background-color: #2c3e50; /* Updated background color */
-		color: #ecf0f1; /* Updated text color */
+		background-color: #2c3e50; 
+		color: #ecf0f1; 
 		border-radius: 5px;
 	
 		margin-bottom: 1em;
-		font-family: Arial, sans-serif; /* Updated font */
+		font-family: Arial, sans-serif; 
 		position: fixed; top: 0;
 		width: calc(100vw - 45px); 
 		z-index: 2;
@@ -132,27 +132,28 @@
 		display: flex;
 		width: 100%;
 		justify-content: space-between;
-		align-items: center; /* Center vertically */
+		align-items: center; 
 	}
 
 	.username-display {
-		background-color: #34495e; /* Updated background color */
-		padding: 8px 12px; /* Adjusted padding */
+		display: inline;
+		background-color: #34495e; 
+		padding: 8px 12px; 
 		border-radius: 5px;
-		margin-right: 10px; /* Added margin for spacing */
+		margin-right: 10px; 
 	}
 
 	.user-input {
 		padding: 8px;
-		border: 1px solid #ccc; /* Updated border color */
+		border: 1px solid #ccc; 
 		border-radius: 5px;
-		margin-right: 10px; /* Added margin for spacing */
+		margin-right: 10px; 
 	}
 
 	.change-user-button {
 		padding: 8px 16px;
-		background-color: #3498db; /* Updated background color */
-		color: #fff; /* Updated text color */
+		background-color: #3498db; 
+		color: #fff; 
 		border: none;
 		border-radius: 5px;
 		cursor: pointer;
@@ -160,13 +161,13 @@
 	}
 
 	.change-user-button:hover {
-		background-color: #2980b9; /* Darker shade on hover */
+		background-color: #2980b9; 
 	}
 
 	button {
 		padding: 8px 16px;
-		background-color: #e74c3c; /* Updated background color */
-		color: #fff; /* Updated text color */
+		background-color: #e74c3c; 
+		color: #fff; 
 		border: none;
 		border-radius: 5px;
 		cursor: pointer;
@@ -174,6 +175,6 @@
 	}
 
 	button:hover {
-		background-color: #c0392b; /* Darker shade on hover */
+		background-color: #c0392b; 
 	}
 </style>

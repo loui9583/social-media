@@ -4,7 +4,7 @@
     import { api } from "../../stores";
     const API = $api;
 
-    let password = ""; // Assuming you're binding this variable in your Svelte component
+    let password = "";
 
     async function changepassword() {
         try {
@@ -22,7 +22,7 @@
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ password }), // Using the bound password variable directly
+                body: JSON.stringify({ password })
             });
 
             toastr.info("Password changed");

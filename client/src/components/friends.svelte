@@ -46,12 +46,12 @@
 		let tempArr = [];
 
 		for (let friend of data.friends) {
-			let onlineStatus = await isUserOnline(friend); // Use await to wait for the promise to resolve
-			let newFriend = { friend: friend, online: onlineStatus }; // Now `online` will be true or false
+			let onlineStatus = await isUserOnline(friend); 
+			let newFriend = { friend: friend, online: onlineStatus }; 
 			tempArr.push(newFriend);
 		}
 		friendsWithStatus = tempArr;
-		friends.set(data.friends); // Correct way to set the store value		
+		friends.set(data.friends); 	
 	}
 
 	async function isUserOnline(username) {
@@ -64,24 +64,26 @@
 	onMount(async () => {
 		await getFriends();
 		intervalId = setInterval(getFriends, 5000);
+		
 	});
 
 	onDestroy(() => {
+		$chatVisible = false; 
 		clearInterval(intervalId);
 	})
 
 	const changeUserToConnectTo = () => {
 		const room = [$username, $userToConnectTo].sort().join('-');
-		socket.emit('leave room', room); // Leave current room
-		socket.emit('join room', room); // Join new room
-		$messages = []; // Clear messages
+		socket.emit('leave room', room);
+		socket.emit('join room', room); 
+		$messages = []; 
 		getRoomMessages(room)
 	};
 
 	function changeFriend(friend) {
-		$userToConnectTo = friend; // Use $ to interact with store
+		$userToConnectTo = friend; 
 		changeUserToConnectTo();
-		$chatVisible = true; // Open the chat box when a new friend is selected
+		$chatVisible = true; 
 	}
 </script>
 

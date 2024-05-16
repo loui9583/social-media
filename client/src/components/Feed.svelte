@@ -14,15 +14,8 @@
 	let newUsername = '';
 	let getNewestPostInterval;
 
-	// Define the scroll handler as a named function
 	function handleScroll() {
 		if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight) {
-			getPosts();
-		}
-	}
-
-	function handleTop() {
-		if (window.scrollY === 0) {
 			getPosts();
 		}
 	}
@@ -68,7 +61,9 @@
 				posts.unshift(newPost);
 				posts = posts;
 			} else {
-				toastr.info(`<a href="#" onclick="window.scrollTo(0,0); return false;">${newPost.username} just made a new post.</a>`)
+				toastr.info(
+					`<a href="#" onclick="window.scrollTo(0,0); return false;">${newPost.username} just made a new post.</a>`
+				);
 			}
 		}
 	}
@@ -95,7 +90,6 @@
 
 	onMount(async () => {
 		await getPosts();
-		// Add event listener using the named function
 
 		getNewestPostInterval = setInterval(getNewestPost, 2000);
 
@@ -103,8 +97,6 @@
 	});
 
 	onDestroy(() => {
-		// Remove event listener using the same named function
-
 		clearInterval(getNewestPostInterval);
 		window.removeEventListener('scroll', handleScroll);
 	});
@@ -113,14 +105,15 @@
 <head>
 	<link href="toastr.css" rel="stylesheet" />
 </head>
-<div class="container" style="margin-right: 20px">
+
+<div class="container">
 	<div id="input-area" class="input-area">
 		<textarea type="text" bind:value={newPost} placeholder="What's on your mind?" />
 		<button on:click={addPost}>Post</button>
 	</div>
 
 	<div class="posts-container">
-		<div style="display: flex; flex-direction: column">
+		<div class="posts">
 			{#each posts as post}
 				<Post {post} />
 			{/each}
@@ -129,7 +122,12 @@
 </div>
 
 <style>
+	.posts {
+		display: flex;
+		flex-direction: column;
+	}
 	.container {
+		margin-right: 20px;
 		display: flex;
 		flex-direction: column;
 		flex: 1;
