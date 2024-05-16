@@ -35,10 +35,7 @@
 <h3>Please enter your username, and we will send you a link to reset your password:</h3>
 <input type="text" bind:value={username} />
 <br /><br />
-<button
-	class="forgot-password-submit-btn"
-	on:click={forgotpassword}>Confirm</button
->
+<button class="forgot-password-submit-btn" on:click={forgotpassword}>Confirm</button>
 
 <style>
 	.forgot-password-submit-btn {

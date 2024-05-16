@@ -2,11 +2,10 @@
 	import { onDestroy, onMount } from 'svelte';
 	export let socket;
 	import { friends, username, userToConnectTo, messages, chatVisible, token, api } from '../stores';
-	import { get } from 'svelte/store';
 
 	let friendsWithStatus = [];
 	let intervalId;
-	
+
 	async function getRoomMessages(roomname) {
 		const response = await fetch(`${$api}/chatroom/${roomname}`, {
 			headers: {
@@ -19,16 +18,14 @@
 		}
 
 		const data = await response.json();
-		
-		console.log(data)
 
-		if (data.messages.length>0){
-			$messages = [...$messages, ...data.messages]
+		console.log(data);
+
+		if (data.messages.length > 0) {
+			$messages = [...$messages, ...data.messages];
 		}
 
-		console.log($messages)
-
-		
+		console.log($messages);
 	}
 
 	async function getFriends() {
@@ -46,12 +43,12 @@
 		let tempArr = [];
 
 		for (let friend of data.friends) {
-			let onlineStatus = await isUserOnline(friend); 
-			let newFriend = { friend: friend, online: onlineStatus }; 
+			let onlineStatus = await isUserOnline(friend);
+			let newFriend = { friend: friend, online: onlineStatus };
 			tempArr.push(newFriend);
 		}
 		friendsWithStatus = tempArr;
-		friends.set(data.friends); 	
+		friends.set(data.friends);
 	}
 
 	async function isUserOnline(username) {
@@ -64,26 +61,25 @@
 	onMount(async () => {
 		await getFriends();
 		intervalId = setInterval(getFriends, 5000);
-		
 	});
 
 	onDestroy(() => {
-		$chatVisible = false; 
+		$chatVisible = false;
 		clearInterval(intervalId);
-	})
+	});
 
 	const changeUserToConnectTo = () => {
 		const room = [$username, $userToConnectTo].sort().join('-');
 		socket.emit('leave room', room);
-		socket.emit('join room', room); 
-		$messages = []; 
-		getRoomMessages(room)
+		socket.emit('join room', room);
+		$messages = [];
+		getRoomMessages(room);
 	};
 
 	function changeFriend(friend) {
-		$userToConnectTo = friend; 
+		$userToConnectTo = friend;
 		changeUserToConnectTo();
-		$chatVisible = true; 
+		$chatVisible = true;
 	}
 </script>
 

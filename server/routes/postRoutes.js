@@ -12,7 +12,7 @@ router.post('/', authenticateToken, async (req, res) => {
   const { content } = req.body;
   const newPost = new PostModel({
     content: content,
-    author: req.user._id,  // Assuming req.user._id is set from authenticateToken middleware
+    author: req.user._id,
     username: req.user.username
   });
 
@@ -37,7 +37,7 @@ router.get('/', authenticateToken, async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('author', 'username');  // Optional: populate author info
+      .populate('author', 'username');
     res.json(posts);
   } catch (error) {
     console.error(error);
@@ -50,12 +50,12 @@ router.get('/:postId', async (req, res) => {
   try {
     const post = await PostModel.findById(postId);
     if (!post) {
-      return res.status(404).send("Post not found");  
+      return res.status(404).send("Post not found");
     }
     res.json(post);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Server error: Unable to retrieve post");  
+    res.status(500).send("Server error: Unable to retrieve post");
   }
 });
 
@@ -64,7 +64,7 @@ router.post('/:postId/comments', authenticateToken, async (req, res) => {
   const { content } = req.body;
   const comment = {
     content: content,
-    author: req.user._id,  // Assuming req.user._id is set from authenticateToken middleware
+    author: req.user._id,
     createdAt: new Date(),
     username: req.user.username
   };
@@ -73,7 +73,7 @@ router.post('/:postId/comments', authenticateToken, async (req, res) => {
     const updatedPost = await PostModel.findByIdAndUpdate(
       postId,
       { $push: { comments: comment } },
-      { new: true } // Returns the updated document
+      { new: true }
     ).populate('comments.author', 'username');
 
     res.json(updatedPost);

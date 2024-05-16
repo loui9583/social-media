@@ -19,7 +19,7 @@
 	let socket;
 
 	function closeChat() {
-		$chatVisible = false; 
+		$chatVisible = false;
 	}
 
 	function initSocket() {
@@ -29,7 +29,7 @@
 					token: $token
 				},
 				transports: ['websocket', 'polling'],
-				rejectUnauthorized: false 
+				rejectUnauthorized: false
 			});
 
 			socket.on('connect_error', (error) => {
@@ -60,33 +60,32 @@
 	});
 
 	onDestroy(() => {
-		closeSocket(); 
-	
+		closeSocket();
 	});
 </script>
 
-
 {#if $token}
-<Navbar {socket}></Navbar>
-<div id="nav-spacer"></div>
+	<Navbar {socket}></Navbar>
+	<div id="nav-spacer"></div>
 
-<div class="chatContainerContainer">
-	<p>&nbsp;</p>
-	<Feed></Feed>
-	{#if $chatVisible}
-		<Messages {closeChat} {socket}></Messages>
-	{/if}
+	<div class="chatContainerContainer">
+		<p>&nbsp;</p>
+		<Feed></Feed>
+		{#if $chatVisible}
+			<Messages {closeChat} {socket}></Messages>
+		{/if}
 
-	<Friends {socket}></Friends>
-</div>
+		<Friends {socket}></Friends>
+	</div>
 {/if}
+
 <style>
-	#nav-spacer{
+	#nav-spacer {
 		height: 50px;
 	}
 	.chatContainerContainer {
 		display: flex;
 		justify-content: space-between;
-		background-color: #f0f2f5; 
+		background-color: #f0f2f5;
 	}
 </style>

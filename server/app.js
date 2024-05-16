@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import userRoutes from './routes/userRoutes.js';
 import chatRoomRoutes from './routes/chatRoomRoutes.js';
 import postRoutes from './routes/postRoutes.js';
-import setupSocket from './sockets/socketHandler.js';  // Import the setup function
+import setupSocket from './sockets/socketHandler.js';
 
 dotenv.config();
 

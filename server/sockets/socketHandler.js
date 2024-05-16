@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 import chatRoomModel from '../db/models/chatRoomModel.js';
-import connectedUsers from '../globalvariables/globalVariables.js';  // Ensure this export is correctly set up to share state
+import connectedUsers from '../globalvariables/globalVariables.js';
 import dotenv from "dotenv";
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET;  // Ensure your environment variables are accessible here
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function setupSocket(io) {
   io.on('connection', (socket) => {
@@ -28,7 +28,7 @@ function setupSocket(io) {
           const room = [roomUsername].sort().join('-');
           socket.join(room);
           console.log(`User joined room: ${room}`);
-          const c = await chatRoomModel.findOne({roomName: room});
+          const c = await chatRoomModel.findOne({ roomName: room });
           if (!c) {
             const newChatRoom = new chatRoomModel({
               roomName: room,
