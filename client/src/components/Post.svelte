@@ -28,7 +28,7 @@
 
 	async function updatePost() {
 		try {
-			const response = await fetch(`${$api}/post/${post._id}`);
+			const response = await fetch(`${$api}/posts/${post._id}`);
 			const data = await response.json();
 			post = data;
 			comments = [...data.comments];

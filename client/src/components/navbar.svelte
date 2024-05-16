@@ -20,7 +20,7 @@
 
     async function getFriends() {
         try {
-            const response = await fetch(`${$api}/user`, {
+            const response = await fetch(`${$api}/users`, {
                 headers: {
                     Authorization: `Bearer ${$token}`
                 }
