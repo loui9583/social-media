@@ -36,6 +36,3 @@
 <input type="password" bind:value={password} />
 <button on:click={changepassword}>Change Password</button>
 
-<head>
-	<link href="toastr.css" rel="stylesheet" />
-</head>

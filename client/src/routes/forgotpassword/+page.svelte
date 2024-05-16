@@ -28,10 +28,6 @@
 	}
 </script>
 
-<head>
-	<link href="toastr.css" rel="stylesheet" />
-</head>
-
 <h3>Please enter your username, and we will send you a link to reset your password:</h3>
 <input type="text" bind:value={username} />
 <br /><br />

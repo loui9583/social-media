@@ -35,9 +35,7 @@
 	}
 </script>
 
-<head>
-	<link href="toastr.css" rel="stylesheet" />
-</head>
+
 
 <h3>Sign Up</h3>
 <form on:submit={handleSubmit}>

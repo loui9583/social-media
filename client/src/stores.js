@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-const defaultApi = "http://localhost:3000";
+const defaultApi = "https://social-media-spw5.onrender.com";
 export const api = writable(defaultApi);
 
 export const user = writable({
