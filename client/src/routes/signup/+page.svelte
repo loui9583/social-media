@@ -1,6 +1,9 @@
 <script>
 	import { api } from '../../stores';
-	const API = $api;
+    import toastr from 'toastr';
+	import 'toastr/build/toastr.css';
+    import { goto } from '$app/navigation';
+    const API = $api;
 
 	let username = '';
 	let password = '';
@@ -19,16 +22,22 @@
 			});
 
 			if (response.ok) {
-				console.log('User created');
-				window.location.href = '/';
+				toastr.info('User created. You can sign in now');
+				goto('/')
 			} else {
-				console.error('Error creating user');
+				
+				const data = await response.json(); 
+				toastr.error('Error creating user:', data.message); 
 			}
 		} catch (error) {
 			console.error('Error during signup:', error);
 		}
 	}
 </script>
+
+<head>
+	<link href="toastr.css" rel="stylesheet" />
+</head>
 
 <h3>Sign Up</h3>
 <form on:submit={handleSubmit}>

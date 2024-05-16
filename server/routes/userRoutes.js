@@ -91,21 +91,30 @@ router.post("/login", async (req, res) => {
 });
 
 router.post('/signup', async (req, res) => {
+    const { username, password, email } = req.body;
 
     try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+     
+        const existingUser = await UserModel.findOne({ username: username });
+        if (existingUser) {
+            return res.status(409).json({ message: "Username already taken" }); 
+        }
+     
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user = new UserModel({
-            username: req.body.username,
+            username: username,
             password: hashedPassword,
-            email: req.body.email,
+            email: email,
         });
+
         await user.save();
-        res.status(201).send();
+        res.status(201).send({ message: "User created successfully", userId: user._id });
     } catch (error) {
-        console.error(error); c
+        console.error(error);
         res.status(500).send("Error creating user");
     }
 });
+
 
 router.post('/changepassword', authenticateToken, async (req, res) => {
     const { username } = req.user;
