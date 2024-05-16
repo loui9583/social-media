@@ -1,13 +1,12 @@
-import adapter from '@sveltejs/adapter-auto';
+import adapter from '@sveltejs/adapter-vercel';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	kit: {
-		// adapter-auto only supports some environments, see https://kit.svelte.dev/docs/adapter-auto for a list.
-		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
-		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
-		adapter: adapter()
-	}
+    kit: {
+        // Use the Vercel adapter for Vercel deployment
+        adapter: adapter(),
+        // Add any other configurations here as needed
+    }
 };
 
 export default config;
