@@ -1,7 +1,7 @@
 import express from 'express';
 import { authenticateToken } from '../middlewares/authMiddleware.js'
 import { PostModel } from '../db/models/postModel.js';
-
+import UserModel from '../db/models/userModel.js';
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -32,12 +32,17 @@ router.get('/', authenticateToken, async (req, res) => {
   const skip = (page - 1) * limit;
 
   try {
+    const user = await UserModel.findOne({ username: req.user.username });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
 
-    const posts = await PostModel.find({ author: { $in: req.user.friends } })
+    const posts = await PostModel.find({ username: { $in: user.friends } })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate('author', 'username');
+      console.log(posts)
     res.json(posts);
   } catch (error) {
     console.error(error);
