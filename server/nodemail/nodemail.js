@@ -31,8 +31,8 @@ export async function sendForgotPasswordEmail(email, username, token) {
     from: process.env.EMAIL_USER,
     to: email,
     subject: `Reset password`,
-    text: `Click here to reset your password: http://localhost:5173/resetpassword?token=${token} `,
-    html: `<b>Click here to reset your password</b> http://localhost:5173/resetpassword?token=${token}`,
+    text: `Click here to reset your password: https://social-media-vert-seven.vercel.app/resetpassword?token=${token} `,
+    html: `<b>Click here to reset your password</b> https://social-media-vert-seven.vercel.app/resetpassword?token=${token}`,
   });
   console.log("Message sent: %s", info.messageId);
 }

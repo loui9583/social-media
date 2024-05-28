@@ -1,5 +1,4 @@
-Gem et array i databasen, der refererer til den pågældende chat med alle beskeder, der er blevet skrevet mellem de to brugere.
+fix posts feed saa det ikke er alles posts der vises, men kun sine venners posts
 //
-Faerdigoer paginerings logik i clienten
-//
-Goer saa man kan oprette posts i clienten (er faerdig paa server) via POST http://localhost:3000/posts
+Mail logik skal aendres. Abentbart bliver alle mails sendt til kdev. Det kan godt aendres.
+Forgot password token link abner men logik virker ikke fordi det referes forkert pga. deployment ikke er paa localhost
