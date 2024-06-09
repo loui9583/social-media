@@ -37,7 +37,7 @@ router.get('/', authenticateToken, async (req, res) => {
       return res.status(404).send("User not found");
     }
 
-    const posts = await PostModel.find({ username: { $in: user.friends } })
+    const posts = await PostModel.find({ username: { $in: [...user.friends, user.username] } })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
