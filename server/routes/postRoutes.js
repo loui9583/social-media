@@ -42,7 +42,6 @@ router.get('/', authenticateToken, async (req, res) => {
       .skip(skip)
       .limit(limit)
       .populate('author', 'username');
-      console.log(posts)
     res.json(posts);
   } catch (error) {
     console.error(error);
